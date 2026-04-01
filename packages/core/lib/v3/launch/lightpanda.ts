@@ -1,6 +1,9 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "child_process";
 import WebSocket from "ws";
-import { ConnectionTimeoutError } from "../types/public/sdkErrors.js";
+import {
+  ConnectionTimeoutError,
+  StagehandInitError,
+} from "../types/public/sdkErrors.js";
 
 interface ConnectLightpandaOptions {
   cdpUrl: string;
@@ -60,15 +63,17 @@ export async function launchLightpanda(
     childProcess.stderr?.on("data", (chunk: Buffer) => {
       stderr += chunk.toString();
     });
-    childProcess.on("error", (err) => {
-      reject(new Error(`Lightpanda process failed to start: ${err.message}`));
+    childProcess.on("error", () => {
+      reject(
+        new StagehandInitError(
+          "Lightpanda process failed to start. Verify that the executablePath is correct.",
+        ),
+      );
     });
     childProcess.on("exit", (code, signal) => {
-      const detail = stderr.trim();
       reject(
-        new Error(
-          `Lightpanda process exited unexpectedly (code=${code ?? "null"}, signal=${signal ?? "null"})` +
-            (detail ? `\n${detail}` : ""),
+        new StagehandInitError(
+          `Lightpanda process exited unexpectedly (code=${code ?? "null"}, signal=${signal ?? "null"}).`,
         ),
       );
     });
