@@ -78,6 +78,10 @@ export const LightpandaLaunchOptionsSchema = z
     connectTimeoutMs: z.number().optional(),
   })
   .strict()
+  .refine((opts) => opts.cdpUrl || opts.executablePath, {
+    message:
+      "Either cdpUrl or executablePath must be provided in lightpandaLaunchOptions.",
+  })
   .meta({ id: "LightpandaLaunchOptions" });
 
 /** Detailed model configuration object */
