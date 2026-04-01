@@ -1090,6 +1090,13 @@ export class V3 {
             });
             ws = result.ws;
             lpProcess = result.process;
+            if (this.keepAlive === true) {
+              try {
+                lpProcess.unref();
+              } catch {
+                // best-effort: avoid keeping the event loop alive
+              }
+            }
           } else {
             throw new StagehandInitError(
               "lightpandaLaunchOptions requires either cdpUrl or executablePath when env is LIGHTPANDA. " +
